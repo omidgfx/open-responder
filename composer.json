@@ -1,6 +1,5 @@
 {
     "name": "omidgfx/open-responder",
-    "version": "1.0.0",
     "description": "A self-contained Laravel API response builder with transformer support (no external packages, Fractal engine inlined).",
     "keywords": [
         "laravel",
