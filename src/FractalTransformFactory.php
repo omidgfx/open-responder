@@ -5,6 +5,7 @@ namespace Omidgfx\Responder;
 use LogicException;
 use Omidgfx\Responder\Contracts\TransformFactory;
 use Omidgfx\Responder\Fractal\Manager;
+use Omidgfx\Responder\Fractal\Resource\NullResource;
 use Omidgfx\Responder\Fractal\Resource\ResourceInterface;
 use Omidgfx\Responder\Fractal\Serializer\SerializerAbstract;
 
@@ -62,7 +63,7 @@ class FractalTransformFactory implements TransformFactory
             'fieldsets' => [],
         ], $options);
 
-        if (! empty($options['fieldsets'])) {
+        if (! empty($options['fieldsets']) && ! $resource instanceof NullResource) {
             if (empty($resourceKey = $resource->getResourceKey())) {
                 throw new LogicException('Filtering fields using sparse fieldsets require resource key to be set.');
             }

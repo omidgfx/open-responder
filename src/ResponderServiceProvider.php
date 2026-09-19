@@ -193,8 +193,8 @@ class ResponderServiceProvider extends BaseServiceProvider
 
         $this->app->bind(TransformBuilder::class, function ($app) {
             $request = $this->app->make(Request::class);
-            $relations = $request->input($this->app->config['responder.load_relations_parameter'], []);
-            $fieldsets = $request->input($app->config['responder.filter_fields_parameter'], []);
+            $relations = $this->parameterInput($request, $app->config['responder.load_relations_parameter']);
+            $fieldsets = $this->parameterInput($request, $app->config['responder.filter_fields_parameter']);
 
             return (new TransformBuilder(
                 $app->make(ResourceFactoryContract::class),
@@ -204,6 +204,22 @@ class ResponderServiceProvider extends BaseServiceProvider
                 ->with(is_string($relations) ? explode(',', $relations) : $relations)
                 ->only($fieldsets);
         });
+    }
+
+    /**
+     * Read the configured query string parameter. A null parameter name means
+     * the feature is disabled and nothing may be read — falling back to the
+     * whole request bag would treat every input as a relation or a fieldset.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|null  $parameter
+     * @return mixed
+     */
+    protected function parameterInput(Request $request, ?string $parameter)
+    {
+        return $parameter === null || $parameter === ''
+            ? []
+            : $request->input($parameter, []);
     }
 
     /**
