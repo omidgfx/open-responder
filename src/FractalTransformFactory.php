@@ -40,6 +40,7 @@ class FractalTransformFactory implements TransformFactory
         $options = $this->parseOptions($options, $resource);
 
         return $this->manager->setSerializer($serializer)
+            ->setContext($options['context'])
             ->parseIncludes($options['includes'])
             ->parseExcludes($options['excludes'])
             ->parseFieldsets($options['fieldsets'])
@@ -61,6 +62,7 @@ class FractalTransformFactory implements TransformFactory
             'includes' => [],
             'excludes' => [],
             'fieldsets' => [],
+            'context' => [],
         ], $options);
 
         if (! empty($options['fieldsets']) && ! $resource instanceof NullResource) {

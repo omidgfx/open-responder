@@ -11,6 +11,8 @@
 
 namespace Omidgfx\Responder\Fractal;
 
+use Omidgfx\Responder\TransformContext;
+
 use Omidgfx\Responder\Fractal\Resource\ResourceInterface;
 use Omidgfx\Responder\Fractal\Serializer\DataArraySerializer;
 use Omidgfx\Responder\Fractal\Serializer\Serializer;
@@ -56,6 +58,9 @@ class Manager
 
     protected ?Serializer $serializer = null;
 
+    /** @var TransformContext|null */
+    protected $context = null;
+
     /**
      * Factory used to create new configured scopes.
      */
@@ -79,6 +84,30 @@ class Manager
         }
 
         return $this->scopeFactory->createScopeFor($this, $resource, $scopeIdentifier);
+    }
+
+    /**
+     * Set the context the transformation runs in - the values handed down
+     * to every transformer of the resource tree.
+     *
+     * @param  array|TransformContext  $context
+     * @return $this
+     */
+    public function setContext($context): self
+    {
+        $this->context = is_array($context) ? new TransformContext($context) : $context;
+
+        return $this;
+    }
+
+    /**
+     * The context the transformation runs in, never null.
+     *
+     * @return TransformContext
+     */
+    public function getContext(): TransformContext
+    {
+        return $this->context ?? new TransformContext;
     }
 
     public function getIncludeParams(string $include): ParamBag

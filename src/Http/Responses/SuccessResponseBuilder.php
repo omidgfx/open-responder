@@ -18,6 +18,7 @@ use Omidgfx\Responder\TransformBuilder;
  * proxied through this builder via [__call].
  *
  * @method \Omidgfx\Responder\Http\Responses\SuccessResponseBuilder meta(array $meta)
+ * @method \Omidgfx\Responder\Http\Responses\SuccessResponseBuilder context(string|array $key, mixed $value = null)
  * @method \Omidgfx\Responder\Http\Responses\SuccessResponseBuilder with(array|string $relations)
  * @method \Omidgfx\Responder\Http\Responses\SuccessResponseBuilder without(array|string $relations)
  * @method \Omidgfx\Responder\Http\Responses\SuccessResponseBuilder serializer(SerializerAbstract|string $serializer)
@@ -67,7 +68,7 @@ class SuccessResponseBuilder extends ResponseBuilder
      */
     public function __call($name, $arguments)
     {
-        if (in_array($name, ['cursor', 'paginator', 'meta', 'with', 'without', 'only', 'serializer'])) {
+        if (in_array($name, ['cursor', 'paginator', 'meta', 'with', 'without', 'only', 'serializer', 'context'])) {
             $this->transformBuilder->$name(...$arguments);
 
             return $this;

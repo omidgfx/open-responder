@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file. Dates
 follow a variant of [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.0] - 2026-10-14
+
+### Added
+- Transform context: `context($key, $value)` on the transform builder and the
+  success response builder passes the situation a transformation runs in —
+  the viewer, a locale, a flag — down to every transformer of the resource
+  tree. Transformers never read the request or the environment themselves.
+- Transformer-side readers on the base transformer: `get($key, $default)`,
+  `has($key)`, `when($key, $fn, $default)` and `whenHas($key, $fn, $default)`.
+  `when` acts on truthiness, `whenHas` on presence; both omit their field from
+  the response entirely when the condition fails, unless a fallback is given.
+- Nested transformations on the base transformer: `via($data, $transformer,
+  $resourceKey)` transforms nested data inline (null data in, null out) and
+  `viaAssured(...)` fails loudly when a guaranteed value resolves to null.
+  Both inherit the transformer's context, so passed-down values flow at every
+  depth.
+- PHPUnit test suite covering the context bag, scope inheritance, the reader
+  methods and the nested transformations.
+
 ## [1.0.1] - 2026-09-19
 
 ### Fixed

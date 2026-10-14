@@ -20,7 +20,12 @@ class ScopeFactory implements ScopeFactoryInterface
         ResourceInterface $resource,
         ?string $scopeIdentifier = null
     ): Scope {
-        return new Scope($manager, $resource, $scopeIdentifier);
+        $scopeInstance = new Scope($manager, $resource, $scopeIdentifier);
+
+        // root scopes run in the context the caller handed the manager
+        $scopeInstance->setContext($manager->getContext());
+
+        return $scopeInstance;
     }
 
     public function createChildScopeFor(
@@ -36,6 +41,9 @@ class ScopeFactory implements ScopeFactoryInterface
         $scopeArray[] = $parentScope->getScopeIdentifier();
 
         $scopeInstance->setParentScopes($scopeArray);
+
+        // the situation flows down the tree: children inherit their parent's context
+        $scopeInstance->setContext($parentScope->getContext());
 
         return $scopeInstance;
     }

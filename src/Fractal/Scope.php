@@ -18,6 +18,8 @@ use Omidgfx\Responder\Fractal\Resource\Primitive;
 use Omidgfx\Responder\Fractal\Resource\NullResource;
 use Omidgfx\Responder\Fractal\Resource\ResourceInterface;
 use Omidgfx\Responder\Fractal\Serializer\Serializer;
+use Omidgfx\Responder\Support\MissingValue;
+use Omidgfx\Responder\TransformContext;
 
 /**
  * Scope
@@ -37,6 +39,9 @@ class Scope implements \JsonSerializable
     protected ResourceInterface $resource;
 
     protected array $parentScopes = [];
+
+    /** @var TransformContext|null */
+    protected $context = null;
 
     public function __construct(Manager $manager, ResourceInterface $resource, ?string $scopeIdentifier = null)
     {
@@ -85,6 +90,26 @@ class Scope implements \JsonSerializable
     public function getResource(): ResourceInterface
     {
         return $this->resource;
+    }
+
+    /**
+     * Set the context this scope's transformers run in.
+     *
+     * @internal
+     */
+    public function setContext(TransformContext $context): self
+    {
+        $this->context = $context;
+
+        return $this;
+    }
+
+    /**
+     * The context this scope's transformers run in, never null.
+     */
+    public function getContext(): TransformContext
+    {
+        return $this->context ?? new TransformContext;
     }
 
     public function getManager(): Manager
@@ -357,6 +382,8 @@ class Scope implements \JsonSerializable
             $transformedData = $transformer->transform($data);
         }
 
+        $transformedData = $this->filterMissingValues($transformedData);
+
         if ($this->transformerHasIncludes($transformer)) {
             $includedData = $this->fireIncludedTransformers($transformer, $data);
             $transformedData = $this->manager->getSerializer()->mergeIncludes($transformedData, $includedData);
@@ -366,6 +393,26 @@ class Scope implements \JsonSerializable
         $transformedData = $this->filterFieldsets($transformedData);
 
         return [$transformedData, $includedData];
+    }
+
+    /**
+     * Strip fields whose [when] / [whenHas] condition failed, so they never
+     * reach the serializer.
+     *
+     * @internal
+     *
+     * @param  mixed  $data
+     * @return mixed
+     */
+    protected function filterMissingValues($data)
+    {
+        if (! is_array($data)) {
+            return $data;
+        }
+
+        return array_filter($data, static function ($value) {
+            return ! $value instanceof MissingValue;
+        });
     }
 
     /**

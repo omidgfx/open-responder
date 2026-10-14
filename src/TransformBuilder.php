@@ -16,6 +16,7 @@ use Omidgfx\Responder\Fractal\Resource\Collection as CollectionResource;
 use Omidgfx\Responder\Fractal\Resource\NullResource;
 use Omidgfx\Responder\Fractal\Serializer\SerializerAbstract;
 use Omidgfx\Responder\Pagination\CursorPaginator;
+use Omidgfx\Responder\TransformContext;
 use Omidgfx\Responder\Transformers\Transformer;
 
 /**
@@ -49,6 +50,9 @@ class TransformBuilder
     /** @var array */
     protected $only = [];
 
+    /** @var TransformContext */
+    protected $context;
+
     /**
      * @param  ResourceFactory  $resourceFactory
      * @param  TransformFactory  $transformFactory
@@ -59,6 +63,7 @@ class TransformBuilder
         $this->resourceFactory = $resourceFactory;
         $this->transformFactory = $transformFactory;
         $this->paginatorFactory = $paginatorFactory;
+        $this->context = new TransformContext;
     }
 
     /**
@@ -109,6 +114,26 @@ class TransformBuilder
         if ($this->resource instanceof CollectionResource) {
             $this->resource->setPaginator($paginator);
         }
+
+        return $this;
+    }
+
+    /**
+     * Pass values into the transformers - the situation this transformation
+     * runs in: the viewer, a locale, a feature switch, anything the
+     * transformer must not compute from the request itself. Accepts a
+     * key/value pair or an array of them, and the values flow down to
+     * every nested transformer of the resource tree.
+     *
+     * @param  string|array  $key
+     * @param  mixed         $value
+     * @return $this
+     */
+    public function context($key, $value = null)
+    {
+        $values = is_array($key) ? $key : [$key => $value];
+
+        $this->context = $this->context->merge($values);
 
         return $this;
     }
@@ -211,6 +236,7 @@ class TransformBuilder
             'includes' => $this->with,
             'excludes' => $this->without,
             'fieldsets' => $this->only,
+            'context'   => $this->context->all(),
         ]);
     }
 
